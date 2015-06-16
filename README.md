@@ -1,11 +1,12 @@
 # netutils
-some useful utilities about network
+
+Some useful utilities about network
 
 ## netmerge
 
 用于合并/压缩网络号, 支持cidr格式和子网掩码格式, 错误的格式将被忽略
 
-sample:
+Sample:
 
 ```bash
     php netmerge.php 0.0.0.0/1 128.0.0.0/1
@@ -29,4 +30,37 @@ sample:
     # 192.168.1.0/30
     # 192.168.1.4/31
     # 192.168.1.6/32
+```
+
+### netmerge/netcal
+
+根据ip开始地址和结束地址, 计算出区间跨越的所有网络
+
+Usage:
+
+```bash
+    php netcal.php <ip_start> <ip_end>
+```
+
+Sample:
+
+```bash
+    php netcal.php 1.1.1.1 2.2.2.2
+    # 1.1.1.1/8
+    # 2.1.1.1/16
+    # 2.2.1.1/24
+    # 2.2.2.1/31
+
+    php netcal.php 192.168.1.0 192.168.1.255
+    # 192.168.1.0/24
+
+    php netcal.php 192.168.1.0 192.168.1.254
+    # 192.168.1.0/25
+    # 192.168.1.128/26
+    # 192.168.1.192/27
+    # 192.168.1.224/28
+    # 192.168.1.240/29
+    # 192.168.1.248/30
+    # 192.168.1.252/31
+    # 192.168.1.254/32
 ```
