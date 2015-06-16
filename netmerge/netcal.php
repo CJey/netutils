@@ -1,8 +1,8 @@
 <?php
 
 function num2net($num) {
-    static $map;
-    if ($map === NULL) {
+    static $map = [];
+    if (empty($map)) {
         for ($i = 0; $i <= 32; ++$i) {
             $map[$i] = pow(2, 32 - $i);
         }
