@@ -126,4 +126,4 @@ function get_nets() {
     return explode("\n", file_get_contents('php://stdin'));
 }
 
-main(get_nets());
+main(get_nets(), true);
