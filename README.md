@@ -148,7 +148,7 @@ Sample:
 Usage:
 
 ```bash
-    php netcal.php <ip_start> <ip_end>
+    php netcal.php {ip_start} {ip_end}
 ```
 
 Sample:
