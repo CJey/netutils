@@ -26,21 +26,46 @@ function merge($nums) {
     return $out;
 }
 
-function reverse($nums) {
-    $r_start = 0;
+function exclude($from, $to) {
+    $cnt_f = count($from);
+    $cnt_t = count($to);
     $out = [];
-    foreach ($nums as list($start, $end)) {
-        if ($start > 0) {
-            $out[] = [$r_start, $start - 1];
+    for ($i = $j = 0; $i < $cnt_f; ++$i) {
+        list($start_f, $end_f) = $from[$i];
+        while ($j < $cnt_t) {
+            list($start_t, $end_t) = $to[$j];
+            if ($start_f > $end_t) {
+                ++$j;
+                continue;
+            }
+            if ($start_t > $end_f) {
+                $out[] = [$start_f, $end_f];
+                continue 2;
+            }
+            if ($start_f >= $start_t) {
+                if ($end_f > $end_t) {
+                    $start_f = $end_t + 1;
+                    ++$j;
+                    continue;
+                }
+                continue 2;
+            }
+            $out[] = [$start_f, $start_t - 1];
+            if ($end_f > $end_t) {
+                $start_f = $end_t + 1;
+                ++$j;
+                continue;
+            }
+            continue 2;
         }
-        $r_start = $end + 1;
+        $out[] = [$start_f, $end_f];
     }
-    if ($r_start < pow(2, 32)) $out[] = [$r_start, pow(2, 32) - 1];
     return $out;
 }
 
-function net2num($net) {
-    static $pattern = '/^(\d+\.\d+\.\d+\.\d+)( *[,\/ ] *((\d+)|(\d+\.\d+\.\d+\.\d+)))?$/';
+function net2num($net, &$exclude = false) {
+    $exclude = false;
+    static $pattern = '/^([\+-]?)(\d+\.\d+\.\d+\.\d+)( *[,\/] *((\d+)|(\d+\.\d+\.\d+\.\d+)))?$/';
     static $map = [];
     static $cmap = [];
     static $dmap = [];
@@ -54,22 +79,23 @@ function net2num($net) {
         }
     }
     if (!preg_match($pattern, trim($net), $match)) return 1;
-    $ip = ip2long($match[1]);
+    $ip = ip2long($match[2]);
     if ($ip === false) return 2;
 
     $cnt = count($match);
-    if ($cnt > 2) {
-        if ($cnt > 5) {
-            $mask = $match[5]; # traditional
+    if ($cnt > 3) {
+        if ($cnt > 6) {
+            $mask = $match[6]; # traditional
             if (!isset($map[$mask])) 3;
             $cidr = $map[$mask];
         } else {
-            $cidr = (int)$match[4]; # cidr
+            $cidr = (int)$match[5]; # cidr
             if ($cidr > 32) return 4;
         }
         if (($ip & $dmap[$cidr]) !== $ip) return 5;
     } else $cidr = 32;
 
+    if ($match[1] === '-') $exclude = true;
     return [$ip, $ip + $cmap[$cidr] - 1];
 }
 
@@ -98,15 +124,19 @@ function num2net($num) {
     return $out;
 }
 
-function main($nets, $reverse = false) {
+function main($nets) {
     $nums = [];
+    $exs = [];
     foreach ($nets as $net) {
-        $num = net2num($net);
+        $num = net2num($net, $ex);
         if (!is_array($num)) continue;
-        $nums[] = $num;
+        if ($ex) $exs[] = $num;
+        else $nums[] = $num;
     }
     $nums = merge($nums);
-    if ($reverse) $nums = reverse($nums);
+    $exs = merge($exs);
+
+    if (!empty($exs)) $nums = exclude($nums, $exs);
 
     $out = [];
     foreach ($nums as $num) {
