@@ -16,7 +16,7 @@ function num2net($num) {
             ++$pos;
         }
         $min = 32 - $pos;
-        for ($i = 32; $i > $min; --$i) {
+        for ($i = 32; $i >= $min; --$i) {
             $tmp = $start + $map[$i] - 1 - $end;
             if ($tmp > 0) {
                 $out[] = [long2ip($start), $i + 1];
@@ -25,16 +25,16 @@ function num2net($num) {
             } elseif ($tmp === 0) {
                 $out[] = [long2ip($start), $i];
                 break 2;
+            } elseif ($i === $min) {
+                $out[] = [long2ip($start), $min];
+                $start += $map[$min];
+                continue 2;
             }
-        }
-        if ($i === $min) {
-            $out[] = [long2ip($start), $min];
-            $start += $map[$i];
-            if ($start > $end) break;
         }
     }
     return $out;
 }
+
 
 if (!isset($argv[2])) {
     echo "Usage: php ${argv[0]} <ip_start> <ip_end>\n";
