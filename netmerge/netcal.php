@@ -10,16 +10,27 @@ function num2net($num) {
     $out = [];
     list($start, $end) = $num;
     while (true) {
-        for ($i = 32; $i >= 0; --$i) {
+        $pos = 0;
+        while ($pos < 32) {
+            if (($start >> $pos) & 1) break;
+            ++$pos;
+        }
+        $min = 32 - $pos;
+        for ($i = 32; $i > $min; --$i) {
             $tmp = $start + $map[$i] - 1 - $end;
             if ($tmp > 0) {
                 $out[] = [long2ip($start), $i + 1];
-                $start = $start + $map[$i + 1];
-                break;
-            } elseif ($tmp == 0) {
+                $start += $map[$i + 1];
+                continue 2;
+            } elseif ($tmp === 0) {
                 $out[] = [long2ip($start), $i];
                 break 2;
             }
+        }
+        if ($i === $min) {
+            $out[] = [long2ip($start), $min];
+            $start += $map[$i];
+            if ($start > $end) break;
         }
     }
     return $out;
